@@ -6,6 +6,7 @@ from io import BytesIO
 import base64
 from bs4 import BeautifulSoup 
 import requests
+import dateparser as dateparser
 
 #don't change this
 matplotlib.use('Agg')
@@ -15,8 +16,8 @@ app = Flask(__name__) #do not change this
 url_get = requests.get('https://www.exchange-rates.org/history/IDR/USD/T')
 soup = BeautifulSoup(url_get.content,"html.parser")
 
-table = soup.find(''table', attrs={'class':'table table-striped table-hover table-hover-solid-row table-simple history-data'}')
-tr = tbody.find_all('tr')
+table = soup.find('table', attrs={'class':'table table-striped table-hover table-hover-solid-row table-simple history-data'})
+tr = table.find_all('tr')
 temp = [] #initiating a tuple
 
 for i in range(1, len(tr)):
@@ -35,7 +36,7 @@ for i in range(1, len(tr)):
 temp = temp[::-1]
 
 #change into dataframe
-data = pd.DataFrame(temp, columns = ('Tanggal','Kurs'))
+df = pd.DataFrame(temp, columns = ('Tanggal','Kurs'))
 
 #insert data wrangling here
 df['Kurs'] = df['Kurs'].apply(lambda x: x.replace(',', ''))
@@ -48,7 +49,7 @@ df['Tanggal']=df['Tanggal'].apply(dateparser.parse)
 @app.route("/")
 def index(): 
 	
-	card_data = f'USD {data["df"].mean().round(2)}'
+	card_data = f'USD {df["Kurs"].mean()}'
 
 	# generate plot
 	ax = df.set_index('Tanggal').plot(figsize = (20,9))
