@@ -38,8 +38,11 @@ temp = temp[::-1]
 data = pd.DataFrame(temp, columns = ('Tanggal','Kurs'))
 
 #insert data wrangling here
+df['Kurs'] = df['Kurs'].apply(lambda x: x.replace(',', ''))
+df['Kurs'] = df['Kurs'].apply(lambda x: x.replace(' IDR', ''))
 
-
+df['Kurs'] = df['Kurs'].astype('float64')
+df['Tanggal']=df['Tanggal'].apply(dateparser.parse)
 #end of data wranggling 
 
 @app.route("/")
